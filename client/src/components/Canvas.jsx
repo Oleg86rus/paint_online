@@ -3,10 +3,11 @@ import '../styles/canvas.scss'
 import { observer } from 'mobx-react-lite'
 import canvasState from '../store/canvasState'
 import toolState from '../store/toolState'
-import Brush from '../tools/Rect'
+import Brush from '../tools/Brush'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useParams } from 'react-router-dom'
+import Rect from '../tools/Rect'
 
 const Canvas = observer(() => {
 	const canvasRef = useRef()
@@ -16,7 +17,6 @@ const Canvas = observer(() => {
 	
 	useEffect(() => {
 		canvasState.setCanvas(canvasRef.current)
-		toolState.setTool(new Brush(canvasRef.current))
 	})
 	
 	useEffect(() => {
@@ -24,6 +24,7 @@ const Canvas = observer(() => {
 			const socket = new WebSocket(`ws://localhost:5010/`)
 			canvasState.setSocket(socket)
 			canvasState.setSessionId(params.id)
+			toolState.setTool(new Brush(canvasRef.current, socket, params.id))
 			socket.onopen = () => {
 				console.log('Подключение установлено')
 				socket.send(JSON.stringify({
@@ -50,8 +51,14 @@ const Canvas = observer(() => {
 		const figure = msg.figure
 		const ctx = canvasRef.current.getContext('2d')
 		switch (figure.type) {
-			case 'brush':
-				Brush.draw(ctx, figure.x, figure.y)
+			case "brush":
+				Brush.staticDraw(ctx, figure.x, figure.y)
+				break
+			case "finish":
+				ctx.beginPath()
+				break
+			case "rect":
+				Rect.staticDraw(ctx, figure.x, figure.y, figure.width, figure.height, figure.color)
 				break
 		}
 	}
