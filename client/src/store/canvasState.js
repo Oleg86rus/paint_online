@@ -3,15 +3,30 @@ import canvas from '../components/Canvas'
 
 class CanvasState {
 	canvas = null
+	socket = null
+	sessionId = null
 	undoList = []
 	redoList = []
+	username = ''
 	
 	constructor () {
 		makeAutoObservable(this)
 	}
 	
+	setSocket(socket) {
+		this.socket = socket
+	}
+	
+	setSessionId(sessionId) {
+		this.sessionId = sessionId
+	}
+	
 	setCanvas(canvas) {
 		this.canvas = canvas
+	}
+	
+	setUsername(username) {
+		this.username = username
 	}
 	
 	pushToUndo(data) {

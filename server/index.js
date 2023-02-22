@@ -13,6 +13,8 @@ app.ws('/', (ws, req) => {
 			case 'connection':
 				connectionHandler(ws, msg)
 				break
+			case 'draw':
+				broadcastConnection(ws, msg)
 		}
 	})
 })
@@ -20,7 +22,6 @@ app.ws('/', (ws, req) => {
 app.listen(PORT, () => console.log(`server start on PORT ${PORT}`))
 
 const connectionHandler = (ws, msg) => {
-	msg = JSON.parse(msg)
 	ws.id = msg.id
 	broadcastConnection(ws, msg)
 }
@@ -28,7 +29,7 @@ const connectionHandler = (ws, msg) => {
 const broadcastConnection = (ws, msg) => {
 	aWss.clients.forEach(client => {
 		if (client.id === msg.id) {
-			client.send(`Пользователь ${msg.username} подключился`)
+			client.send(JSON.stringify(msg))
 		}
 	})
 }
