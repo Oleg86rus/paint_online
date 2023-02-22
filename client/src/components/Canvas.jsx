@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useParams } from 'react-router-dom'
 import Rect from '../tools/Rect'
+import axios from 'axios'
 
 const Canvas = observer(() => {
 	const canvasRef = useRef()
@@ -17,7 +18,17 @@ const Canvas = observer(() => {
 	
 	useEffect(() => {
 		canvasState.setCanvas(canvasRef.current)
-	})
+		axios.get(`http://localhost:5010/image?id=${params.id}`)
+			.then(res => {
+			const img = new Image()
+			img.src = res.data
+			img.onload = () => {
+				this.ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+				this.ctx.drawImage(img, 0, 0, canvasRef.current.width, canvasRef.current.height)
+				this.ctx.stroke()
+			}
+		})
+	}, [])
 	
 	useEffect(() => {
 		if (canvasState.username) {
@@ -65,6 +76,8 @@ const Canvas = observer(() => {
 	
 	const mouseDownHandler = () => {
 		canvasState.pushToUndo(canvasRef.current.toDataURL())
+		axios.post(`http://localhost:5010/image?id=${params.id}`, {img: canvasRef.current.toDataURL()})
+			.then(response => console.log(response.data))
 	}
 	
 	const connectionHandler = () => {
